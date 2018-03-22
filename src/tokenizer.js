@@ -1,6 +1,6 @@
 // build the route via pattern
 
-const { extend  } = require('./util');
+const { extend, error  } = require('./util');
 
 
 // path 
@@ -16,6 +16,7 @@ function Tokenizer(input, option) {
     this.delimiter = option.delimiter || '/';
     this.option = option;
     this.tokens = [];
+    this.paramMap= {};
 }
 
 const to = Tokenizer.prototype;
@@ -26,7 +27,6 @@ to.tokenize = function() {
     const tokenStream = [{pattern: false, tokens: []}];
 
     let tokenObj = tokenStream[0];
-    let preIndex;
 
     if(input[0] === delimiter) this.index = 1;
     let preSlashIndex = this.index;
@@ -34,9 +34,7 @@ to.tokenize = function() {
     // index Or 
     while ( (char = input[this.index]) && this.index < length ) {
 
-        if (this.index === preIndex) throw Error('Circular tokenize')
 
-        preIndex = this.index;
         switch ( char ) {
             case ':':
                 tokenObj.tokens.push( this.readNamedCapture() );
@@ -80,6 +78,10 @@ to.readNamedCapture = function() {
 
     let capture
 
+    if( this.paramMap[word.value] ) throw error('Conflict param: ' + word.value, 'ParseError'); 
+
+    this.paramMap[word.value] = 1;
+
     if( this.char() === '(' ) {
 
         capture = this.readCapture();
@@ -90,7 +92,11 @@ to.readNamedCapture = function() {
             value: DEFAULT_CAPTURE_PATTERN,
             retain: 1
         }
+        if(this.eat('?')){
+            capture.optional = true;
+        }
     }
+
     capture.name = word.value;
     return capture
 }
@@ -147,6 +153,10 @@ to.readCapture = function(){
 
     this.match(')');
 
+    if(this.eat('?')){
+        token.optional = true
+    }
+
     return token;
 
 
@@ -154,7 +164,7 @@ to.readCapture = function(){
 
 to.match = function( char){
 
-   if( !this.eat(char) ) throw Error('expect '+ char + ' got ' + this.char());
+   if( !this.eat(char) ) throw error('expect '+ char + ' got ' + this.char(), 'ParseError');
 
 }
 
@@ -166,9 +176,6 @@ to.eat = function(char){
     return false;
 }
 
-to.next = function(){
-    this.index++;
-}
 
 to.readWord = function(){
 

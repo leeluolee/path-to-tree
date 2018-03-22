@@ -1,10 +1,10 @@
-function extend(o1, o2, override) {
-    for (var i in o2)
-        if (override || o1[i] === undefined) {
-            o1[i] = o2[i];
-        }
-    return o1;
-};
+// function extend(o1, o2, override) {
+//     for (var i in o2)
+//         if (override || o1[i] === undefined) {
+//             o1[i] = o2[i];
+//         }
+//     return o1;
+// };
 
 
 // 避免内存泄漏
@@ -12,7 +12,7 @@ function cachedHashMap( option ) {
     option = option || {};
 
     var keys = [],
-        limit = option.limit || 1000,
+        limit = option.limit || 100,
         cache = {};
 
     return {
@@ -28,13 +28,9 @@ function cachedHashMap( option ) {
             return value;
         },
         get: function(key) {
-            if (key === undefined) return cache;
             return cache[key];
         },
-        limit: limit,
-        len: function() {
-            return keys.length;
-        }
+        limit: limit
     };
 }
 
@@ -42,46 +38,18 @@ function escapeRegexp( str ) {
     return str.replace(/([.+*?=^!:${}()[\]|/\\])/g, '\\$1')
 }
 
-/**
- * find Sub Capture to fix regexp.exec capture position
- * @param  {String} regStr regexp string
- * @return {Number}        subcapture number
- */
 
-function findSubCapture(regStr) {
-
-
-    let left = 0,
-        right = 0,
-        len = regStr.length,
-        ignored = regStr.match(ignoredRef); // ignored uncapture
-
-    if (ignored) {
-
-        ignored = ignored.length
-    } else {
-
-        ignored = 0;
-    }
-
-    for (; len--;) {
-
-        let letter = regStr.charAt(len);
-        if (len === 0 || regStr.charAt(len - 1) !== "\\") {
-
-            if (letter === "(") left++;
-            if (letter === ")") right++;
-        }
-    }
-    if (left !== right) throw "RegExp: " + regStr + "'s bracket is not marched";
-    else return left - ignored;
-
+function error( message, name ){
+    let errorObj = {message}
+    if(name) errorObj.name = name
+    return errorObj;
 }
 
 
 
 module.exports = {
-    extend,
+    // extend,
     cachedHashMap,
-    escapeRegexp
+    escapeRegexp,
+    error
 }

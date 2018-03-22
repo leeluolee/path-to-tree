@@ -35,15 +35,14 @@ const {
     cachedHashMap,
     escapeRegexp
 } = require('./util');
-// save the regexp to 
-const regExpCache = cachedHashMap(100);
+// save the regexp to . to avoid memory leak
+const regExpCache = cachedHashMap(1000);
 
 
 function create() {
     return {
         patterns: [],
-        staticMap: {},
-        option: {}
+        staticMap: {}
     }
 }
 
@@ -71,7 +70,7 @@ function addPattern(route, tokenObj, context) {
             names.push(token.name? token.name:  unnamedCapture + anonyCapture++)
 
             captureIndex += token.retain;
-            ret += '(' + token.value + ')'
+            ret += '(' + token.value + ')' + (token.optional? '?':'')
         }
     }
     let path = '^' + ret + '$';
@@ -84,34 +83,37 @@ function addPattern(route, tokenObj, context) {
 
     let pattern = findPattern( patterns, path );
 
-    if( pattern ) return addExisitPattern( pattern, raw, names )
+    if( pattern ) {
+        if( !sameArray(pattern.names, names) ) {
+            throw Error('named Capture conflict ' + raw + ' -> ' + pattern.raw )
+        }
+        return pattern.route;
+    }
 
     pattern = {
         key: path,
         regexp: reg,
+        raw,
         slots,
-        matches: {}
+        names,
+        route: create()
     }
 
     patterns.push( pattern );
 
-    return addExisitPattern( pattern, raw, names)
+    return pattern.route
 }
 
-function addExisitPattern(pattern, raw, names){
+function sameArray(arr1, arr2){
+    if(arr2.length !== arr1.length) return false;
 
-    let matches = pattern.matches;
-    let match = matches[raw];
-
-    if( match ) return match.route;
-
-    match = matches[raw] = {
-        names,
-        route: create()
+    for(let i=0, len = arr1.length; i < len; i++){
+        if(arr1[i] !== arr2[i]) return false;
     }
-    return match.route;
-
+    return true
 }
+
+
 
 
 /**

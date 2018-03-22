@@ -16,7 +16,6 @@ function find ( route, index, context ){
     index = index || 0;
 
 
-
     let found = findStatic( route, index, context );
 
     if( found ) return found;
@@ -39,18 +38,19 @@ function findStatic( route, index, context ){
     const found = staticMap[ path ];
 
     if( found ) {
-        const isLast = index === context.length-1;
+        const isLast = index === context.length - 1;
 
         // if absolute match or  the route has end === false option
-        if( isLast ){
-            return found;
-        }else{
-            let childFound = find(found, index+1, context);
-            if(childFound) return childFound
-            else {
-                if(route.end === false) return found
-            }
+        if( isLast  ){ // need registed
+            return found.touched? found: null;
         }
+
+        let childFound = find(found, index+1, context);
+        if( childFound ) return childFound
+
+        // end means touched
+        if(found.end === false ) return found
+        
     }
 }
 
@@ -75,27 +75,26 @@ function findDynamic( route, index, context ){
         // use test for better performance
         let ret = regexp.exec(path); 
 
+
         if(ret){
             // 后面有没有找到
 
-            let matches = pattern.matches;
+            let nextRoute = pattern.route;
 
-            let keys = Object.keys(matches);
-
-            for( let j = 0, klen = keys.length; j < klen; j++ ){
-
-                let match = matches[ keys[j] ];
-                let matchFound
-
-                if( isLast || (matchFound  = find( match.route, index + 1, context ) ) ) {
-
-
-                    buildParam( ret, pattern.slots , match.names, context.param ) 
-
-                    return isLast? match.route: matchFound;
-                }
+            if( isLast ){
+                if(!nextRoute.touched) return ;
+                buildParam( ret, pattern.slots , pattern.names, context.param ) 
+                
+                return  nextRoute;
             }
 
+            let nextFound = find( nextRoute, index + 1, context );
+
+
+            if(nextFound || nextRoute.end === false ) {
+                buildParam( ret, pattern.slots , pattern.names, context.param ) 
+                return nextFound? nextFound : nextRoute;
+            }
 
 
         }
@@ -109,7 +108,8 @@ function buildParam( execRet, slots, names, param){
 
     for( let i = 0, len = names.length ; i < len; i++ ){
         // @TODO warning same param
-        param[names[i]] = execRet[slots[i]]
+        const name =  names[i];
+        param[name] = execRet[slots[i]]
     }
 
 }
