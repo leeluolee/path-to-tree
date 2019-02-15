@@ -3,19 +3,17 @@ var webpack = require('webpack');
 
 var config =  {
 
+    entry: "./lib/index.js",
+
     output: {
-        filename: "nerouter.js",
-        library: "nerouter",
+        filename: "ptt.js",
+        library: "ptt",
         path: path.join(__dirname, 'dist'),
         libraryTarget: "umd"
     },
-    mode: 'development',
+    mode: 'production',
     
-    externals: {
-        // require("jquery") 是引用自外部模块的
-        // 对应全局变量 jQuery
-        "nerouter": "nerouter"
-    },
+    externals: { "ptt": "ptt" },
 
     devtool:'source-map'
 };
