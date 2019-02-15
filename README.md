@@ -1,4 +1,3 @@
-[![Coverage Status](https://img.shields.io/coveralls/leeluolee/path-to-tree/master.svg?style=flat)](https://coveralls.io/github/leeluolee/path-to-tree?branch=master) 
 [![Build Status](https://travis-ci.org/leeluolee/path-to-tree.svg?branch=master)](https://travis-ci.org/leeluolee/path-to-tree)
 
 A tiny(3kb) foundation for building  fast router via  __Radix Tree strategy__ , high-performance alternative for famous [__path-to-regexp__](https://github.com/pillarjs/path-to-regexp)。
