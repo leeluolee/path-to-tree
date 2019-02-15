@@ -1,6 +1,6 @@
 {
   "name": "path-to-tree",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "high performance alternative for path-to-regexp to create routing lib",
   "main": "lib/index.js",
   "keywords": [
